@@ -1,4 +1,7 @@
-from sys import argv
+import os
+import subprocess
+
+from sys import argv, platform
 from pathlib import Path
 from shutil import copy2
 from datetime import datetime
@@ -22,7 +25,7 @@ class ToDoList():
 	def sort(self):
 		items = self.items.values()
 		sorted_items = (
-			[i for i in items if i.startswith('!')] +
+			[i for i in items if i.startswith('+')] +
 			[i for i in items if i.startswith('-')] +
 			[i for i in items if i.startswith('x')]
 		)
@@ -31,7 +34,7 @@ class ToDoList():
 	def flush(self):
 		items = self.items.values()
 		sorted_items = (
-			[i for i in items if i.startswith('!')] +
+			[i for i in items if i.startswith('+')] +
 			[i for i in items if i.startswith('-')]
 		)
 		self.items = {k+1: i for k,i in enumerate(sorted_items)}
@@ -46,7 +49,7 @@ class ToDoList():
 				fstr = Style.DIM + fstr + Style.RESET_ALL
 			elif i.status == 'x':
 				fstr = Style.DIM + '\033[9m' + fstr + '\033[0m' + Style.RESET_ALL
-			elif i.status == '!':
+			elif i.status == '+':
 				fstr = '\033[1m' + Fore.RED + fstr + Fore.RED + '\033[0m'
 			s.append(fstr)
 		return '\n'.join(s)
@@ -65,18 +68,38 @@ def save_todofile(tdl):
 		fid.write('\n'.join(tdl.items.values()))
 
 def main() -> None:
-	tdl = ToDoList(load_todofile())
 
 	if len(argv) < 2:
+		tdl = ToDoList(load_todofile())
 		print(tdl)
-	elif argv[1] in '-x!':
+	elif argv[1] in '-+x':
+		tdl = ToDoList(load_todofile())
 		tdl.items[len(tdl.items)+1] = ' '.join(argv[1:])
 		tdl.sort()
 		print(tdl)
+		save_todofile(tdl)
 	elif argv[1] == 'flush':
+		tdl = ToDoList(load_todofile())
 		tdl.flush()
 		print(tdl)
+		save_todofile(tdl)
+	elif argv[1] == 'open':
+		if platform == 'win32':
+			os.startfile(todofile)
+		elif platform == 'darwin':
+			subprocess.run(['open', todofile])
+		else:
+			subprocess.run(['xdg-open', todofile])
 	else:
-		print('Unknown command!')
-
-	save_todofile(tdl)
+		tdl = ToDoList(load_todofile())
+		if (
+			(s := argv[1][-1]) in '-+x'
+			and
+			(k := int(argv[1][:-1])) in tdl.items
+		):
+			tdl.items[k] = s + tdl.items[k][1:]
+			tdl.sort()
+			print(tdl)
+			save_todofile(tdl)
+		else:
+			print('Unknown command!')
