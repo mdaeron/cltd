@@ -1,0 +1,19 @@
+[project]
+name = "cltd"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "mdaeron", email = "mathieu@daeron.fr" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "colorama>=0.4.6",
+]
+
+[project.scripts]
+cltd = "cltd:main"
+
+[build-system]
+requires = ["flit_core>=3.2,<4"]
+build-backend = "flit_core.buildapi"
