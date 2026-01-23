@@ -96,8 +96,12 @@ def main() -> None:
 				s, txt = txt[0], txt[1:].strip()
 			else:
 				s = '-'
+
 			tdl = ToDoList(load_todofile())
-			tdl.items[len(tdl.items)+1] = f'{s} {txt}'
+			for k,v in tdl.items.copy().items():
+				tdl.items[k+1] = v
+			tdl.items[1] = f'{s} {txt}'
+
 			tdl.sort()
 			print(tdl)
 			save_todofile(tdl)
