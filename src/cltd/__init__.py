@@ -89,7 +89,7 @@ def main() -> None:
 
 		if argv[1] == 'add':
 			if len(argv) < 3:
-				print('Missing task!')
+				print('Missing task :(')
 				exit()
 			txt = ' '.join(argv[2:])
 			if re.compile(r'[-+x]').match(txt):
@@ -117,6 +117,23 @@ def main() -> None:
 			print(tdl)
 			save_todofile(tdl)
 
+		elif argv[1] == 'undo':
+			files = sorted(
+				todofile.parent.glob(f'{todofile.stem}-backup-*{todofile.suffix}'),
+				key = lambda s: int(str(s).split('-')[-1])
+			)
+			if len(files) == 0:
+				print('No backup is available :(')
+				exit()
+
+			copy2(files[0], todofile)
+			for k in range(len(files)-1):
+				copy2(files[k+1], files[k])
+			files[-1].unlink()
+
+			tdl = ToDoList(load_todofile())
+			print(tdl)
+
 		elif argv[1] == 'open':
 			if platform == 'win32':
 				os.startfile(todofile)
@@ -127,7 +144,7 @@ def main() -> None:
 
 		elif argv[1] == 'vi':
 			if platform == 'win32':
-				print('Not sure how to call vi on Windows!')
+				print('Not sure how to call vi on Windows :(')
 			else:
 				subprocess.run(['vi', todofile])
 				tdl = ToDoList(load_todofile())
@@ -143,7 +160,7 @@ def main() -> None:
 			s = p.group('s')
 			tdl = ToDoList(load_todofile())
 			if i not in tdl.items:
-				print('No task with that index!')
+				print('No task with that index :(')
 			else:
 				tdl.items[i] = s + tdl.items[i][1:]
 				tdl.sort()
@@ -156,10 +173,10 @@ def main() -> None:
 			i = int(argv[1])
 			tdl = ToDoList(load_todofile())
 			if i not in tdl.items:
-				print('No task with that index!')
+				print('No task with that index :(')
 			else:
 				if len(argv) < 3:
-					print(f'Missing instruction for task {i}!')
+					print(f'Missing instruction for task {i} :(')
 					exit()
 				if argv[2] in ('x', 'done'):
 					tdl.items[i] = 'x' + tdl.items[i][1:]
@@ -179,4 +196,4 @@ def main() -> None:
 
 		else:
 
-			print('Unknown command!')
+			print('Unknown command :(')
