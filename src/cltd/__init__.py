@@ -8,7 +8,11 @@ from shutil import copy2
 from types import SimpleNamespace
 from colorama import Fore, Style, init
 
-todofile = Path.home() / ".cltd"
+if len(argv) > 2 and argv[1] == '-f':
+	todofile = Path.home() / argv[2]
+	argv = argv[:1] + argv[3:]
+else:
+	todofile = Path.home() / ".cltd"
 
 def decode(x):
 	return SimpleNamespace(status = x[0], txt = x[1:].strip())
